@@ -12,11 +12,16 @@ class NotesService {
   List<DatabaseNote> _notes = [];
 
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
 
@@ -78,7 +83,7 @@ class NotesService {
     final notes = await db.query(
       noteTable,
       limit: 1,
-      where: 'id = ?',
+      where: 'note_id = ?',
       whereArgs: [id],
     );
     if (notes.isEmpty) {
@@ -108,7 +113,7 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     final deletedCount = await db.delete(
       noteTable,
-      where: 'id = ?',
+      where: 'note_id = ?',
       whereArgs: [id],
     );
     if (deletedCount == 0) {
@@ -132,14 +137,14 @@ class NotesService {
     const text = '';
 
     // create the note
-    final noteID = await db.insert(noteTable, {
+    final noteId = await db.insert(noteTable, {
       userIdColumn: owner.id,
       textColumn: text,
       isSyncedWithCloudColumn: 1,
     });
 
     final note = DatabaseNote(
-      noteID,
+      noteId,
       owner.id,
       text,
       true,
@@ -288,6 +293,7 @@ class DatabaseNote {
   );
 
   DatabaseNote.fromRow(Map<String, Object?> map)
+      // : noteId = map[noteIdColumn] != null ? map[idColumn] as int : 0,
       : noteId = map[noteIdColumn] as int,
         userId = map[userIdColumn] as int,
         text = map[textColumn] as String,
@@ -322,7 +328,7 @@ const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
         );''';
 
 const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
-        "note_id"	INTEGER NOT NULL,
+        "id"	INTEGER NOT NULL,
         "user_id"	INTEGER NOT NULL,
         "text"	TEXT,
         "is_synced_with_cloud"	INTEGER NOT NULL DEFAULT 0,
