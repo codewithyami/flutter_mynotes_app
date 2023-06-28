@@ -293,7 +293,6 @@ class DatabaseNote {
   );
 
   DatabaseNote.fromRow(Map<String, Object?> map)
-      // : noteId = map[noteIdColumn] != null ? map[idColumn] as int : 0,
       : noteId = map[noteIdColumn] as int,
         userId = map[userIdColumn] as int,
         text = map[textColumn] as String,
@@ -314,9 +313,9 @@ class DatabaseNote {
 const dbName = 'notes.db';
 const noteTable = 'note';
 const userTable = 'user';
-const idColumn = "id";
-const noteIdColumn = "note_id";
-const emailColumn = "email";
+const idColumn = 'id';
+const noteIdColumn = 'note_id';
+const emailColumn = 'email';
 const userIdColumn = 'user_id';
 const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
@@ -328,7 +327,7 @@ const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
         );''';
 
 const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
-        "id"	INTEGER NOT NULL,
+        "note_id"	INTEGER NOT NULL,
         "user_id"	INTEGER NOT NULL,
         "text"	TEXT,
         "is_synced_with_cloud"	INTEGER NOT NULL DEFAULT 0,
